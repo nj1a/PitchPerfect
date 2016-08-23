@@ -16,29 +16,25 @@ class RecordSoundViewController: UIViewController, AVAudioRecorderDelegate {
     @IBOutlet weak var stopRecordingButton: UIButton!
     
     var audioRecorder: AVAudioRecorder!
-
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        // Do any additional setup after loading the view, typically from a nib.
-    }
-
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
-    }
     
     // called before view appear on screen
     override func viewWillAppear(animated: Bool) {
         stopRecordingButton.enabled = false
     }
     
+    // attach the audio url to the segue
+    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+        if (segue.identifier == "stopRecording") {
+            let playSoundVC = segue.destinationViewController as! PlaySoundsViewController
+            let recordedAudioURL = sender as! NSURL
+            playSoundVC.recordedAudioURL = recordedAudioURL
+        }
+    }
     
     // start recording
     @IBAction func reordAudio(sender: AnyObject) {
         print("record button pressed")
-        recordingLabel.text = "Recording..."
-        stopRecordingButton.enabled = true
-        recordButton.enabled = false
+        toggleRecordButton(true)
         
         // set up path to the recorded audio: document dir
         let dirPath = NSSearchPathForDirectoriesInDomains(.DocumentDirectory,.UserDomainMask, true)[0] as String
@@ -63,10 +59,7 @@ class RecordSoundViewController: UIViewController, AVAudioRecorderDelegate {
     // stop recording
     @IBAction func stopRecording(sender: AnyObject) {
         print("stop recording pressed")
-        recordingLabel.text = "Tap to record"
-        
-        recordButton.enabled = true
-        stopRecordingButton.enabled = false
+        toggleRecordButton(false)
         
         // stop recordingLabel
         audioRecorder.stop()
@@ -85,13 +78,9 @@ class RecordSoundViewController: UIViewController, AVAudioRecorderDelegate {
         }
     }
     
-    // attach the audio url to the segue
-    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
-        if (segue.identifier == "stopRecording") {
-            let playSoundVC = segue.destinationViewController as! PlaySoundsViewController
-            let recordedAudioURL = sender as! NSURL
-            playSoundVC.recordedAudioURL = recordedAudioURL
-        }
+    func toggleRecordButton(isRecording: Bool) {
+        recordingLabel.text = isRecording ? "Recording" : "Tap to record"
+        recordButton.enabled = !isRecording
+        stopRecordingButton.enabled = isRecording
     }
 }
-
